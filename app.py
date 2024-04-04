@@ -82,13 +82,13 @@ def handle_message(message, queue_url):
                 QueueUrl=dead_letter_queue_url, MessageBody=message["Body"]
             )
             delete_message(queue_url, message["ReceiptHandle"])
-            logger.warning(f"Message {message['MessageId']} moved to Dead Letter Queue and deleted from SQS queue")
+            logger.warning(
+                f"Message {message['MessageId']} moved to Dead Letter Queue and deleted from SQS queue"
+            )
 
 
 def delete_message(queue_url, receipt_handle):
-    sqs_client.delete_message(
-        QueueUrl=queue_url, ReceiptHandle=receipt_handle
-    )
+    sqs_client.delete_message(QueueUrl=queue_url, ReceiptHandle=receipt_handle)
 
 
 def get_queue_url(queue_name):
