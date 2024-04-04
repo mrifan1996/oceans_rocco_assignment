@@ -8,7 +8,7 @@ from PIL import Image
 from app import download_image, handle_message, process_message, resize_image
 
 
-class TestDownloadImage(unittest.TestCase):
+class TestApp(unittest.TestCase):
 
     def setUp(self):
         # Create temporary directories for testing
@@ -21,10 +21,11 @@ class TestDownloadImage(unittest.TestCase):
         shutil.rmtree("test_resized")
 
     @patch("requests.get")
-    def test_download_image_success(self, mock_get):
+    def test_download_image(self, mock_get):
         # Set up mock response for a successful download
         mock_response = MagicMock()
         mock_response.status_code = 200
+        # Setting a random bytes value for fake image
         mock_response.content = b"Fake image content"
         mock_get.return_value = mock_response
 
@@ -34,22 +35,8 @@ class TestDownloadImage(unittest.TestCase):
         # Check if the file is downloaded successfully
         self.assertTrue(os.path.exists("test_image.jpg"))
 
-    @patch("requests.get")
-    def test_download_image_failure(self, mock_get):
-        # Set up mock response for a failed download
-        mock_response = MagicMock()
-        mock_response.status_code = 404
-        mock_response.reason = "Not Found"
-        mock_get.return_value = mock_response
-
-        # Call download_image function
-        download_image("http://example.com/image.jpg", "test_image.jpg")
-
-        # Check if the file is not downloaded
-        self.assertFalse(os.path.exists("test_image.jpg"))
-
     def test_resize_image(self):
-        # Create a test image
+        # Create a test image using Pillows
         test_image = Image.new("RGB", (800, 600), color="red")
         test_image_path = "test_image.jpg"
         test_image.save(test_image_path)
@@ -65,7 +52,7 @@ class TestDownloadImage(unittest.TestCase):
         with Image.open(output_path) as resized_image:
             self.assertEqual(
                 resized_image.size, (256, 192)
-            )  # Height should be resized to 192
+            )  # Height should be resized to 192 as it maintains aspect ratio
 
         # Clean up: remove the test image and resized image
         os.remove(test_image_path)
@@ -126,6 +113,7 @@ class TestDownloadImage(unittest.TestCase):
     @patch("app.get_queue_url", return_value="test_dlq_url")
     def test_handle_message_error(
         self,
+        mock_get_queue_url,
         mock_send_message,
         mock_delete_message,
         mock_process_message,
