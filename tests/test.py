@@ -126,7 +126,6 @@ class TestDownloadImage(unittest.TestCase):
     @patch("app.get_queue_url", return_value="test_dlq_url")
     def test_handle_message_error(
         self,
-        mock_get_queue_url,
         mock_send_message,
         mock_delete_message,
         mock_process_message,
