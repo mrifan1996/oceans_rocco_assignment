@@ -69,7 +69,7 @@ def handle_message(message, queue_url):
         processed = process_message(message)
         if processed:
             # Delete the message from the queue if processed successfully
-            delete_message(queue_url)
+            delete_message(queue_url, message["ReceiptHandle"])
     except Exception as e:
         logger.error(f"Error processing message {message['MessageId']}: {e}")
         if (
@@ -81,13 +81,13 @@ def handle_message(message, queue_url):
             sqs_client.send_message(
                 QueueUrl=dead_letter_queue_url, MessageBody=message["Body"]
             )
-            delete_message(queue_url)
+            delete_message(queue_url, message["ReceiptHandle"])
             logger.warning(f"Message {message['MessageId']} moved to Dead Letter Queue and deleted from SQS queue")
 
 
-def delete_message(queue_url):
+def delete_message(queue_url, receipt_handle):
     sqs_client.delete_message(
-        QueueUrl=queue_url, ReceiptHandle=message["ReceiptHandle"]
+        QueueUrl=queue_url, ReceiptHandle=receipt_handle
     )
 
 
